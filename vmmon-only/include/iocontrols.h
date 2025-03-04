@@ -146,7 +146,7 @@ PtrToVA64(void const *ptr) // IN
  * the NT specific VMX86_DRIVER_VERSION.
  */
 
-#define VMMON_VERSION           (416 << 16 | 0)
+#define VMMON_VERSION           (417 << 16 | 0)
 #define VMMON_VERSION_MAJOR(v)  ((uint32) (v) >> 16)
 #define VMMON_VERSION_MINOR(v)  ((uint16) (v))
 
