@@ -42,6 +42,22 @@ install: retiredcheck $(MODFILES)
 	strip --strip-debug $(MODULES:%=$(DESTDIR)$(MODDIR)/%.ko)
 	if test -z "$(DESTDIR)"; then $(DEPMOD) -a $(VM_UNAME); fi
 
+uninstall:
+	@echo "Uninstalling kernel modules..."
+	@for mod in $(MODULES); do \
+	    if [ -f "$(DESTDIR)$(MODDIR)/$$mod.ko" ]; then \
+	        echo "Removing $(DESTDIR)$(MODDIR)/$$mod.ko"; \
+	        rm -f "$(DESTDIR)$(MODDIR)/$$mod.ko"; \
+	    else \
+	        echo "Module $$mod.ko not found in $(DESTDIR)$(MODDIR)"; \
+	    fi \
+	done
+	if test -z "$(DESTDIR)"; then \
+	    echo "Updating module dependencies..."; \
+	    $(DEPMOD) -a $(VM_UNAME); \
+	fi
+	@echo "Uninstall complete."
+
 clean: $(SUBDIRS)
 	rm -f *.o
 
