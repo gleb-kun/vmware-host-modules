@@ -32,15 +32,27 @@ retiredcheck:
 	@test -f RETIRED && cat RETIRED || true
 
 install: retiredcheck $(MODFILES)
+	@echo "Installing kernel modules..."
 	@for f in $(MODFILES); do \
 	    mver=$$($(MODINFO) -F vermagic $$f);\
 	    mver=$${mver%% *};\
 	    test "$${mver}" = "$(VM_UNAME)" \
 	        || ( echo "Version mismatch: module $$f $${mver}, kernel $(VM_UNAME)" ; exit 1 );\
 	done
-	install -D -t $(DESTDIR)$(MODDIR) $(MODFILES)
-	strip --strip-debug $(MODULES:%=$(DESTDIR)$(MODDIR)/%.ko)
-	if test -z "$(DESTDIR)"; then $(DEPMOD) -a $(VM_UNAME); fi
+	@for f in $(MODFILES); do \
+	    target="$(DESTDIR)$(MODDIR)/$$(basename $$f)"; \
+	    echo "Installing $$f -> $$target"; \
+	    install -D $$f $$target; \
+	done
+	@for mod in $(MODULES); do \
+	    echo "Stripping debug symbols from $(DESTDIR)$(MODDIR)/$$mod.ko"; \
+	    strip --strip-debug $(DESTDIR)$(MODDIR)/$$mod.ko; \
+	done
+	if test -z "$(DESTDIR)"; then \
+	    echo "Updating module dependencies..."; \
+	    $(DEPMOD) -a $(VM_UNAME); \
+	fi
+	@echo "Installation complete."
 
 uninstall:
 	@echo "Uninstalling kernel modules..."
